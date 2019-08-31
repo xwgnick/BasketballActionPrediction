@@ -76,7 +76,7 @@ After we carefully chose the rows and columns in our dataset, we decovered that 
 ## Model Choosing
 We first chose a typical 4-layer neural network to train the model without balancing the data. It turns out that the result is very imbalanced. Although the testing accuray reached 68%, it is easy to see that our model is trying to predict every thing to be "dribble". By observing that our dataset is acatually a sequence since all the rows are ordered by time and the information in each row is affected by all the rows before it. So we started to consider maybe RNN will do a better job. To set a contrast group, we also kept our origin 4-layer NN model. So, we chose a typical 4-layer NN and a 4-layer RNN as our final model.
 
-### Model Training
+## Model Training
 We built and trained our model in pytorch. Thanks to youtuber @sentdex, I learned how to build and train a RNN in Pytorch. The model building code of the 4-layer NN is shown below:
 
 ```
@@ -167,7 +167,7 @@ I also used Cross-validation technique to choose the models with highest validat
 
 ```
 
-### Testing Result
+## Testing Result
 1. Testing Accuracy:
 Testing accuracy of the typical sequential neural network: 75.85%
 Testing accuracy of the Recurrent neural network: 76.51%
@@ -176,7 +176,7 @@ Testing accuracy of the Recurrent neural network: 76.51%
 3. Confusion Matrix -- Judge the prediction performance
 <img width="675" alt="Screen Shot 2019-08-31 at 3 42 27 PM" src="https://user-images.githubusercontent.com/47826970/64068433-02c75a00-cc06-11e9-97c1-d05a9fc0e2f2.png">
 
-### Conclusion
+## Conclusion
 
 1. Imbalanced data can make the prediction result very biased. In our model,
 more than 40% of the actions made by the ball holder are dribble. So, our
