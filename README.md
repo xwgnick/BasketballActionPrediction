@@ -72,3 +72,104 @@ After we carefully chose the rows and columns in our dataset, we decovered that 
         print(printline)
 
 ```
+
+## Model Choosing
+We first chose a typical 4-layer neural network to train the model without balancing the data. It turns out that the result is very imbalanced. Although the testing accuray reached 68%, it is easy to see that our model is trying to predict every thing to be "dribble". By observing that our dataset is acatually a sequence since all the rows are ordered by time and the information in each row is affected by all the rows before it. So we started to consider maybe RNN will do a better job. To set a contrast group, we also kept our origin 4-layer NN model. So, we chose a typical 4-layer NN and a 4-layer RNN as our final model.
+
+### Model Training
+We built and trained our model in pytorch. Thanks to youtuber @sentdex, I learned how to build and train a RNN in Pytorch. The model building code of the 4-layer NN is shown below:
+
+```
+        self.temp_model = nn.Sequential(nn.Linear(49,256),
+                              nn.ReLU(),
+                              nn.Dropout(p=0.2),
+                              nn.Linear(256,128),
+                              nn.ReLU(),
+                              nn.Dropout(p=0.2),
+                              nn.Linear(128,64),
+                              nn.ReLU(),
+                              nn.Dropout(p=0.2),
+                              nn.Linear(64,7),
+                              nn.LogSoftmax(dim=1))
+# 
+
+```
+The model building code of  the 4-layer RNN is shown below:
+
+
+```
+
+    model = Sequential()
+    model.add(LSTM(128, input_shape=((SEQ_LEN, 49)), return_sequences=True))
+    model.add(Dropout(0.2))
+    model.add(BatchNormalization())  #normalizes activation outputs, same reason you want to normalize your input data.
+
+    model.add(LSTM(128, return_sequences=True))
+    model.add(Dropout(0.1))
+    model.add(BatchNormalization())
+
+    model.add(LSTM(128))
+    model.add(Dropout(0.2))
+    model.add(BatchNormalization())
+
+    model.add(Dense(32, activation='relu'))
+    model.add(Dropout(0.2))
+
+    model.add(Dense(6, activation='softmax'))
+
+
+```
+
+I also used Cross-validation technique to choose the models with highest validation accuracy during training process. The code is shown below:
+
+```
+
+    def cross_fit(self, epoch = 200, smote = False):
+        self.chosen_models = []
+        for i in range(len(self.datasets_training) - 1):
+#        for i in range(1):
+            print("********************************************************************")
+            printline = "cross vadation processing the " + str(i) + " time"
+            print(printline)
+            self.build_model()
+            exculde_list = [i, i + 1]
+            validation_sets = [self.datasets_training[i], self.datasets_training[i + 1]]
+            training_sets = [elem for j, elem in enumerate(self.datasets_training) if j not in exculde_list]
+            training_feature_combine, training_label_combine, _,_ = self.dataset_combining(training_sets)
+            if smote == True:
+                label_num_org = count_label(training_label_combine["label"])
+                print("The label number before smote is: ", label_num_org)
+                sm = SMOTE(sampling_strategy = {2:label_num_org[1]})
+                X_res, y_res = sm.fit_resample(training_feature_combine, training_label_combine["label"])
+                training_feature_combine = pd.DataFrame(X_res)
+                training_label_combine = pd.DataFrame(y_res)
+                training_label_combine=training_label_combine.rename(columns = {0:"label"})
+                label_num_smoted = count_label(training_label_combine["label"])
+                print("The label number after somte is: ", label_num_smoted)
+            testing_feature_combine, testing_label_combine, _,_ = self.dataset_combining(validation_sets)
+            self.chosen_models.append(self.train(training_feature_combine, training_label_combine, testing_feature_combine, testing_label_combine, epoch = epoch))
+        highest_acc = 0
+        chosen_model = None
+        testing_sets = []
+        for dataset in self.datasets_testing:
+            testing_sets.append(dataset)
+        if len(testing_sets) > 1:
+            testing_set = pd.concat(testing_sets)
+        else:
+            testing_set = testing_sets[0]
+        for model in self.chosen_models:
+            sample = testing_set.nn_ready.iloc[:]
+            acc, _, _ = self.prediction(model, sample, reverse_dict(self.datasets_training[0].real_label_number), mode = "more", verbose = False, acc_verbose = False)
+            if acc > highest_acc:
+                highest_acc = acc
+                self.model = model
+
+
+```
+
+### Testing Result
+1. Testing Accuracy:
+Testing accuracy of the typical sequential neural network: 75.85%
+Testing accuracy of the Recurrent neural network: 76.51%
+2. Error Analysis
+See which class is the most difficult to predict
