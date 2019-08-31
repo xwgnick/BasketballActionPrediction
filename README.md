@@ -177,20 +177,18 @@ Testing accuracy of the Recurrent neural network: 76.51%
 <img width="675" alt="Screen Shot 2019-08-31 at 3 42 27 PM" src="https://user-images.githubusercontent.com/47826970/64068433-02c75a00-cc06-11e9-97c1-d05a9fc0e2f2.png">
 
 ### Conclusion
-1.
-Imbalanced data can make the prediction result very biased. In our model,
+
+1. Imbalanced data can make the prediction result very biased. In our model,
 more than 40% of the actions made by the ball holder are dribble. So, our
 model learned has the trend to predict other classes to be dribble more
 likely. Using normalization and SMOTE can decrease the influence brought
 by the imbalanced data.
-2.
-RNN has better performance on sequential data. It improved the testing
+2. RNN has better performance on sequential data. It improved the testing
 accuracy of our model from 75.85% to 76.51%. More importantly, RNN
 improved our model’s performance on imbalanced dataset. It decreased the
 error rate of “pass” (the most imbalanced class in our dataset) from 77% to
 71%.
-3.
-The reason RNN did a better performance on the minority classes (pass) is
+3. The reason RNN did a better performance on the minority classes (pass) is
 because it sacrificed some of the prediction accuracy on the majority class
 (dribble). In the confusion matrix, the correct labelled “dribble” decreased
 from 569 to 562 while the correct labelled “pass” increased from 49 to 71.
